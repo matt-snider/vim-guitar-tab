@@ -16,8 +16,13 @@ function! guitartab#chords#lookup(chord_name)
 endfunction
 
 
+function! guitartab#chords#is_muted(string)
+    return a:string is v:null
+endfunction
+
+
 function! guitartab#chords#is_open(string)
-    return a:string isnot v:null && a:string.fret == 0 && a:string.finger == 0
+    return !guitartab#chords#is_muted(a:string) && a:string.fret == 0 && a:string.finger == 0
 endfunction
 
 
