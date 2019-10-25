@@ -32,9 +32,9 @@ function! guitartab#show_guitar_chord(chord) abort
     let bufnr = bufnr('%')
     let float_win_id = nvim_open_win(bufnr, v:true, {
     \   'relative': 'cursor',
-    \   'anchor': 'NE',
+    \   'anchor': 'NW',
     \   'row': 1,
-    \   'col': 1,
+    \   'col': 0,
     \   'width': 24,
     \   'height': len(diagram) + 1,
     \ })
