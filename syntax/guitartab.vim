@@ -5,7 +5,7 @@
 if exists("b:current_syntax")
   finish
 endif
-let b:current_syntax = "guitar-tab"
+let b:current_syntax = "guitartab"
 
 syn keyword guitarTabSection Intro Verse Chorus Riff
 syn keyword guitarTabMetadata Artist Band Title Tuning
