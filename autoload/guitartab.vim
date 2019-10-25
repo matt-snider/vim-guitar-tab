@@ -8,6 +8,18 @@ function! s:is_guitar_chord(chord) abort
     return a:chord =~ s:chord_regex
 endfunction
 
+function! guitartab#kbd_enter() abort
+    let col = col('.') - 1
+    let line = getline('.')[col:]
+    let parts = split(line)
+    if len(line) == 0 || len(parts) == 0 || !s:is_guitar_chord(parts[0])
+        return "\<CR>"
+    endif
+
+    " Move up one ('k') and then call hover_chord()
+    return "\<ESC>k :call guitartab#hover_chord()\<CR>"
+endfunction
+
 function! guitartab#hover_chord() abort
     let col = col('.') - 1
     let line = getline('.')[col:]
@@ -23,6 +35,7 @@ function! guitartab#hover_chord() abort
 
     call guitartab#show_guitar_chord(chord)
 endfunction
+
 
 " Shows the given chord by name
 " TODO: implement it - currently just shows G chord
