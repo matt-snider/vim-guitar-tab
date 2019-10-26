@@ -55,7 +55,20 @@ function! guitartab#show_chord(chord_name) abort
         \ nospell nolist nomodeline
     call setline(1, diagram)
     setlocal nomodified nomodifiable
+    set previewwindow
+
+    " Jump back to main window
+    wincmd j
+
+    " Close on movement
+    augroup plugin-guitartab-close-hover
+        let close_cmd = printf('<SID>close_window(%s)', float_win_id)
+
+        execute 'autocmd CursorMoved,CursorMovedI,InsertEnter <buffer> call ' . close_cmd
+        " execute 'autocmd BufEnter * call ' . call_on_bufenter
+    augroup END
 endfunction
+
 
 
 "----------------"
@@ -140,6 +153,12 @@ function! s:chord_diagram(chord_name) abort
     call insert(lines, s:pad(chord_label, 3, 0), 0)
 
     return lines
+endfunction
+
+
+function! s:close_window(winid) abort
+    autocmd! plugin-guitartab-close-hover
+    call nvim_win_close(a:winid, v:false)
 endfunction
 
 
