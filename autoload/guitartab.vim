@@ -4,42 +4,37 @@
 
 let s:chord_regex = '[A-G][b#]\?\(\(sus\|maj\|min\|aug\|dim\|m\)\d\?\)\?\(/[A-G][b#]\?\)\?'
 
-function! s:is_guitar_chord(text) abort
-    return a:text =~ s:chord_regex
-endfunction
 
+" The handler for Enter/<CR> so we can override the behaviour.
+" Checks if there is a chord at cursor and shows it, otherwise
+" returns a normal <CR>.
+"
+" Note: this returns expressions and should therefore be used
+" with a <expr> binding
 function! guitartab#kbd_enter() abort
-    let col = col('.') - 1
-    let line = getline('.')[col:]
-    let parts = split(line)
-    if len(line) == 0 || len(parts) == 0 || !s:is_guitar_chord(parts[0])
+    let chord_name = s:extract_chord_at_cursor()
+    if chord_name is v:null
         return "\<CR>"
     endif
 
-    " Move up one ('k') and then call hover_chord()
-    return "\<ESC>k :call guitartab#hover_chord()\<CR>"
+    " Move up one ('k') and show the chord
+    return "\<ESC>k :call guitartab#show_chord('" . chord_name . "')\<CR>"
 endfunction
 
-function! guitartab#hover_chord() abort
-    let col = col('.') - 1
-    let line = getline('.')[col:]
-    let parts = split(line)
-    if len(line) == 0 || len(parts) == 0
-        return v:false
-    endif
 
-    let chord = parts[0]
-    if !s:is_guitar_chord(chord)
+" Like `kbd_enter()` but doesn't return an expression
+function! guitartab#hover_chord() abort
+    let chord_name = s:extract_chord_at_cursor()
+    if chord_name is v:null
         return
     endif
-
-    call guitartab#show_guitar_chord(chord)
+    call guitartab#show_chord(chord_name)
 endfunction
 
 
 " Shows the given chord by name
 " TODO: implement it - currently just shows G chord
-function! guitartab#show_guitar_chord(chord_name) abort
+function! guitartab#show_chord(chord_name) abort
     let diagram = s:chord_diagram(a:chord_name)
     let pos = getpos('.')
     let bufnr = bufnr('%')
@@ -60,6 +55,28 @@ function! guitartab#show_guitar_chord(chord_name) abort
         \ nospell nolist nomodeline
     call setline(1, diagram)
     setlocal nomodified nomodifiable
+endfunction
+
+
+"----------------"
+" Helper Methods "
+"----------------"
+
+" Check if the given text is a guitar chord
+function! s:is_guitar_chord(text) abort
+    return a:text =~ s:chord_regex
+endfunction
+
+
+" Get the chord at the current cursor position, otherwise `v:null`
+function! s:extract_chord_at_cursor() abort
+    let col = col('.') - 1
+    let line = getline('.')[col:]
+    let parts = split(line)
+    if len(line) == 0 || len(parts) == 0 || !s:is_guitar_chord(parts[0])
+        return v:null
+    endif
+    return parts[0]
 endfunction
 
 
