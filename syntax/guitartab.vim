@@ -8,10 +8,13 @@ endif
 let b:current_syntax = "guitartab"
 
 syntax keyword GuitarTabSection
-    \ Intro Verse Chorus Riff
+    \ Intro Verse Chorus Riff Outro
 
 syn keyword GuitarTabMetadata
-    \ Artist Band Title Tuning
+    \ Artist Author Band Capo Title Tuning
+
+syn match GuitarTabMetadata
+    \ "^Tab\s\+\(Author\|Source\):\?"
 
 syntax match GuitarChord
     \ contained
