@@ -1,0 +1,11 @@
+" Set required vimwiki options
+set nocompatible
+filetype plugin on
+syntax on
+
+set encoding=utf-8
+
+let &runtimepath.=',../'
+
+au BufRead,BufNewFile *.tab set filetype=guitartab
+
