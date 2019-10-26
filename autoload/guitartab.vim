@@ -36,6 +36,10 @@ endfunction
 " TODO: implement it - currently just shows G chord
 function! guitartab#show_chord(chord_name) abort
     let diagram = s:chord_diagram(a:chord_name)
+    if diagram is v:null
+        return
+    endif
+
     let pos = getpos('.')
     let bufnr = bufnr('%')
     let float_win_id = nvim_open_win(bufnr, v:true, {
@@ -99,13 +103,17 @@ endfunction
 
 
 function! s:chord_diagram(chord_name) abort
-    let chord_data = guitartab#chords#lookup(a:chord_name)
+    let chord = guitartab#chords#lookup(a:chord_name)
+    if chord is v:null
+        echoerr "Chord not in database: " . a:chord_name
+        return v:null
+    endif
 
     " Find the max and min bounds of the chord diagram
     " so we can show just a subset of the fretboard.
     let min_fret = 30
     let max_fret = 0
-    for string in chord_data
+    for string in chord
         if guitartab#chords#is_open_or_muted(string)
             continue
         endif
@@ -122,7 +130,7 @@ function! s:chord_diagram(chord_name) abort
     " then relativize the chord to that position
     " Note: we copy so that we don't overwrite
     let fret_position = max([0, max_fret - 4])
-    for string in chord_data
+    for string in chord
         if guitartab#chords#is_open_or_muted(string)
             continue
         endif
@@ -133,7 +141,7 @@ function! s:chord_diagram(chord_name) abort
     " Convert our diagram to a textual representation
     let lines = []
     let fret_line = repeat('-', 16)
-    let diagram = s:Diagram(chord_data, max([max_fret - min_fret, 4]))
+    let diagram = s:Diagram(chord, max([max_fret - min_fret, 4]))
     let idx = 0
     for row in diagram
         let line = join(row, "  ")

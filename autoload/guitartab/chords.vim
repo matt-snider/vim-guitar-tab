@@ -12,6 +12,10 @@
 let s:chords = {}
 
 function! guitartab#chords#lookup(chord_name)
+    if !has_key(s:chords, a:chord_name)
+        return v:null
+    endif
+
     return s:chords[a:chord_name][0]
 endfunction
 
