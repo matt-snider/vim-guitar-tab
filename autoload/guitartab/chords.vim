@@ -48,39 +48,67 @@ let s:chords["A"] = [
     \ [v:null, s:open, s:F(1, 2), s:F(2, 2), s:F(3, 2), s:open],
     \ ]
 
-
-" B chord
-let s:chords["B"] = [
-    \ [v:null, s:F(1, 2), s:F(3, 4), s:F(3, 4), s:F(3, 4), s:F(1, 2)],
+let s:chords["Am"] = [
+    \ [v:null, s:open, s:F(2, 2), s:F(3, 2), s:F(1, 1), s:open],
     \ ]
 
 
-" C chord
+" B chords
+let s:chords["B"] = [
+    \ [v:null, s:F(1, 2), s:F(2, 4), s:F(3, 4), s:F(4, 4), s:F(1, 2)],
+    \ ]
+
+let s:chords["Bm"] = [
+    \ [v:null, s:F(1, 2), s:F(3, 4), s:F(4, 4), s:F(2, 3), s:F(1, 2)],
+    \ ]
+
+
+" C chords
 let s:chords["C"] = [
     \ [v:null, s:F(3, 3), s:F(2, 2), s:open, s:F(1, 1), s:open],
     \ ]
 
-
-" D chord
-let s:chords["D"] = [
-    \ [v:null, v:null, s:open, s:F(2, 2), s:F(3, 3), s:F(1, 2)],
+let s:chords["Cm"] = [
+    \ [v:null, s:F(1, 3), s:F(3, 5), s:F(4, 5), s:F(2, 4), s:F(1, 3)],
     \ ]
 
 
-" E chord
+" D chords
+let s:chords["D"] = [
+    \ [v:null, v:null, s:open, s:F(1, 2), s:F(3, 3), s:F(2, 2)],
+    \ ]
+
+let s:chords["Dm"] = [
+    \ [v:null, v:null, s:open, s:F(2, 2), s:F(3, 3), s:F(1, 1)],
+    \ ]
+
+
+" E chords
 let s:chords["E"] = [
     \ [s:open, s:F(2, 2), s:F(3, 2), s:F(1, 1), s:open, s:open],
     \ ]
 
-
-" F chord
-let s:chords["F"] = [
-    \ [s:F(1, 1), s:F(3, 3), s:F(2, 3), s:F(2, 2), s:F(1, 1), s:F(1, 1)],
+let s:chords["Em"] = [
+    \ [s:open, s:F(2, 2), s:F(3, 2), s:open, s:open, s:open],
     \ ]
 
 
-" G chord
+" F chords
+let s:chords["F"] = [
+    \ [s:F(1, 1), s:F(3, 3), s:F(4, 3), s:F(2, 2), s:F(1, 1), s:F(1, 1)],
+    \ ]
+
+let s:chords["Fm"] = [
+    \ [s:F(1, 1), s:F(3, 3), s:F(4, 3), s:F(1, 1), s:F(1, 1), s:F(1, 1)],
+    \ ]
+
+
+" G chords
 let s:chords["G"] = [
     \ [s:F(2, 3), s:F(1, 2), s:open, s:open, s:F(3, 3), s:F(4, 3)],
+    \ ]
+
+let s:chords["Gm"] = [
+    \ [s:F(2, 3), s:F(1, 1), s:open, s:open, s:F(3, 3), s:F(4, 3)],
     \ ]
 
