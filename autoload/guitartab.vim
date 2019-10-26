@@ -2,8 +2,8 @@
 "
 " Autoload
 
-let s:chord_regex = '[A-G][b#]\?\(\(sus\|maj\|min\|aug\|dim\|m\)\d\?\)\?\(/[A-G][b#]\?\)\?'
-
+let s:chord_regex = '\<[A-G][b#]\?\(\(sus\|maj\|min\|aug\|dim\|m\)\d\?\)\?\(/[A-G][b#]\?\)\?\>'
+let s:chord_line_regex = '^\(\s\|\(' . s:chord_regex . '\)\)\+$'
 
 " The handler for Enter/<CR> so we can override the behaviour.
 " Checks if there is a chord at cursor and shows it, otherwise
@@ -80,13 +80,18 @@ function! s:is_guitar_chord(text) abort
     return a:text =~ s:chord_regex
 endfunction
 
+" Check if the given line is a guitar chord line which is
+" composed of guitar chords, whitespace and nothing else
+function! s:is_guitar_chord_line(line) abort
+    return a:line =~ s:chord_line_regex
+endfunction
+
 
 " Get the chord at the current cursor position, otherwise `v:null`
 function! s:extract_chord_at_cursor() abort
-    let col = col('.') - 1
-    let line = getline('.')[col:]
-    let parts = split(line)
-    if len(line) == 0 || len(parts) == 0 || !s:is_guitar_chord(parts[0])
+    let line = getline('.')
+    let parts = split(line[col('.') - 1:])
+    if len(line) == 0 || len(parts) == 0 || !s:is_guitar_chord(parts[0]) || !s:is_guitar_chord_line(line)
         return v:null
     endif
     return parts[0]
