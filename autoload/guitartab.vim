@@ -47,7 +47,7 @@ function! guitartab#show_chord(chord_name) abort
     \   'anchor': 'NW',
     \   'row': 1,
     \   'col': 0,
-    \   'width': 24,
+    \   'width': 25,
     \   'height': len(diagram) + 1,
     \ })
 
@@ -147,15 +147,14 @@ function! s:chord_diagram(chord_name) abort
         let line = join(row, "  ")
 
         " Add line of diagram
-        call add(lines, s:pad(line, 3, 3))
-
-        " Add fret line - set fret positio on the first one
-        if idx == 0
-            let l = fret_position . " " . fret_line
-            call add(lines, s:pad(l, 1, 0))
+        " Add fret indicator if not at top of fretboard
+        if idx == 1 && fret_position != 0
+            let line = line. " " . fret_position . "fr"
+            call add(lines, s:pad(line, 4, 0))
         else
-            call add(lines, s:pad(fret_line, 3, 3))
+            call add(lines, s:pad(line, 4, 3))
         endif
+        call add(lines, s:pad(fret_line, 4, 3))
 
         let idx += 1
     endfor
@@ -163,7 +162,7 @@ function! s:chord_diagram(chord_name) abort
     " Add the chord label + a new line separator
     let chord_label = a:chord_name . " Chord"
     call insert(lines, "", 0)
-    call insert(lines, s:pad(chord_label, 3, 0), 0)
+    call insert(lines, s:pad(chord_label, 4, 0), 0)
 
     return lines
 endfunction
