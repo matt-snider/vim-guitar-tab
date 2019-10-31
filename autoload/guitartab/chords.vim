@@ -34,6 +34,23 @@ function! guitartab#chords#is_open_or_muted(string)
     return a:string is v:null || guitartab#chords#is_open(a:string)
 endfunction
 
+function! guitartab#chords#is_bar_chord(chord)
+    " Ensure all strings associated with the bar chord are
+    " fretted with first finger
+    let to_check = []
+    if !guitartab#chords#is_muted(a:chord[0])
+        let to_check = [a:chord[0], a:chord[4], a:chord[5]]
+    else
+        let to_check = [a:chord[1], a:chord[5]]
+    endif
+
+    for string in to_check
+        if guitartab#chords#is_open_or_muted(string) || string.finger != 1
+            return v:false
+        endif
+    endfor
+    return v:true
+endfunction
 
 " Chord helper - 'F' for finger placed at position/fret x
 function! s:F(finger, fret)

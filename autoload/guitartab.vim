@@ -237,3 +237,32 @@ function! s:Diagram(chord_data, num_frets)
     return diagram
 endfunction
 
+" This method uses unicode characters to make
+" a indicator for barred strings.
+" It will be done across `num_strings` with `spaces`
+" between each string
+"
+" e.g. ━┿━━┿━━❶━━┿━━┿━
+function! s:make_bar(num_strings, finger_symbol)
+    let sep = repeat(['━'], 2)
+    let result = []
+    for _ in range(a:num_strings)
+        call extend(result, ['┿'] + sep)
+    endfor
+
+    " We add a bar to the beginning, but the end already has
+    " 2 of them so we remove one
+    let result = ['━'] + result[:-2]
+
+    " Create the resulting string and then find the
+    " midpoint to add the finger indicator. We don't
+    " want to put it over a string though
+    let mid = float2nr(round(len(result) / 2))
+    if result[mid] != '┿'
+        let result[mid] = a:finger_symbol
+    else
+        let result[mid-1] = a:finger_symbol
+    endif
+    return join(result, '')
+endfunction
+
