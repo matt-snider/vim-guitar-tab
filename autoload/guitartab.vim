@@ -102,6 +102,8 @@ function! s:extract_chord_at_cursor() abort
 endfunction
 
 
+let s:circled_numbers = ['❶','❷', '❸', '❹']
+
 function! s:chord_diagram(chord_name) abort
     let chord = guitartab#chords#lookup(a:chord_name)
     if chord is v:null
@@ -144,6 +146,8 @@ function! s:chord_diagram(chord_name) abort
     let diagram = s:Diagram(chord, max([max_fret - min_fret, 4]))
     let idx = 0
     for row in diagram
+        " Map to fancy circled numbers
+        let row = map(row, {_, v -> type(v) == v:t_number ? s:circled_numbers[v-1] : v})
         let line = join(row, "  ")
 
         " Add line of diagram
