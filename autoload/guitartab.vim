@@ -33,13 +33,13 @@ endfunction
 
 
 " Shows the given chord by name
-" TODO: implement it - currently just shows G chord
 function! guitartab#show_chord(chord_name) abort
     let diagram = s:chord_diagram(a:chord_name)
     if diagram is v:null
         return
     endif
 
+    let max_width = max(map(deepcopy(diagram), {_, x -> strchars(x)}))
     let pos = getpos('.')
     let bufnr = bufnr('%')
     let float_win_id = nvim_open_win(bufnr, v:true, {
@@ -47,7 +47,7 @@ function! guitartab#show_chord(chord_name) abort
     \   'anchor': 'NW',
     \   'row': 1,
     \   'col': 0,
-    \   'width': 25,
+    \   'width': max_width,
     \   'height': len(diagram) + 1,
     \ })
 
@@ -128,39 +128,87 @@ function! s:chord_diagram(chord_name) abort
         endif
     endfor
 
-    " Calculate the fret position of the diagram and
-    " then relativize the chord to that position
-    " Note: we copy so that we don't overwrite
+    " Calculate the fret position of the diagram
+    " Note: for bar chords, move up to <first finger pos - 1>
     let fret_position = max([0, max_fret - 4])
-    for string in chord
-        if guitartab#chords#is_open_or_muted(string)
-            continue
-        endif
+    if guitartab#chords#is_bar_chord(chord)
+        let fret_position = max([fret_position, min_fret - 1])
+    endif
 
-        let string.fret -= fret_position
-    endfor
+    " Find any barred sections for this chord and decide whether to show
+    " the fret position indicator at the nut. We don't need it if there is
+    " a bar chord at the first shown fret, which indicates it more clearly.
+    let barred_sections = guitartab#chords#get_barred_sections(chord)
+    let show_fret_at_nut = fret_position > 0 && len(filter(barred_sections, {_, v -> v.end == 5 && v.fret == fret_position + 1})) == 0
 
     " Convert our diagram to a textual representation
     let lines = []
     let fret_line = repeat('-', 16)
-    let diagram = s:Diagram(chord, max([max_fret - min_fret, 4]))
-    let idx = 0
+    let diagram = s:Diagram(chord, max([max_fret - min_fret, 4]), fret_position)
+    let row_idx = 0
     for row in diagram
-        " Map to fancy circled numbers
-        let row = map(row, {_, v -> type(v) == v:t_number ? s:circled_numbers[v-1] : v})
-        let line = join(row, "  ")
+        let line = ""
+        let col_idx = 0
 
-        " Add line of diagram
-        " Add fret indicator if not at top of fretboard
-        if idx == 1 && fret_position != 0
-            let line = line. " " . fret_position . "fr"
-            call add(lines, s:pad(line, 4, 0))
-        else
-            call add(lines, s:pad(line, 4, 3))
+        while col_idx < 6
+            let symbol = row[col_idx]
+
+            " Only pad left if after the first string
+            let padl = col_idx > 0 ? 1 : 0
+            let padr = 1
+
+            " Check if this is a fretted string or not
+            " Handle bar chord and single fretted string differently
+            if type(symbol) == v:t_number
+                let row_barred_sections = filter(barred_sections,
+                        \ {_, v -> v.fret == (fret_position + row_idx) && v.start == col_idx})
+
+                if len(row_barred_sections) > 0
+                    let barred = row_barred_sections[0]
+                    let barred_len = 1 + barred.end - barred.start
+
+                    " Add bar chord line and add fret indicator if needed
+                    " NOTE: no padding for bar chord
+                    let line .= s:make_bar(barred_len, s:circled_numbers[barred.finger - 1])
+                    if barred.end == 5 && !show_fret_at_nut
+                        let line .= " " . barred.fret . "fr"
+                    endif
+
+                    let col_idx += barred_len
+                else
+                    let line .= s:pad(s:circled_numbers[symbol-1], padl, padr)
+                    let col_idx += 1
+                endif
+            else
+                let line .= s:pad(symbol, padl, padr)
+                let col_idx += 1
+            endif
+        endwhile
+
+        " Add the line. Reduce left pad if we have a full bar chord on the first fret.
+        let l_padl = 4
+        let l_padr = 3
+        let is_full_bar = len(barred_sections)
+            \ && barred_sections[0].fret == (fret_position + 1)
+            \ && barred_sections[0].start == 0
+            \ && barred_sections[0].end == 5
+        if is_full_bar
+            let l_padl = 3
         endif
-        call add(lines, s:pad(fret_line, 4, 3))
+        call add(lines, s:pad(line, l_padl, l_padr))
 
-        let idx += 1
+        " Show fret position at nut if needed
+        " Adjust padding as needed
+        let fret_line_copy = deepcopy(fret_line)
+        let fl_padl = 4
+        let fl_padr = 3
+        if row_idx == 0 && show_fret_at_nut
+            let fret_line_copy = fret_position . "fr " . fret_line
+            let fl_padl = 0
+        endif
+        call add(lines, s:pad(fret_line_copy, fl_padl, fl_padr))
+
+        let row_idx += 1
     endfor
 
     " Add the chord label + a new line separator
@@ -204,7 +252,7 @@ endfunction
 "   [f3_s0, f3_s1, ... f3_s5, f3_s6]
 "   // ...
 " ]
-function! s:Diagram(chord_data, num_frets)
+function! s:Diagram(chord_data, num_frets, fret_position)
     let diagram = []
 
     " Initialize first row to guitar string state
@@ -229,7 +277,9 @@ function! s:Diagram(chord_data, num_frets)
                 return
             endif
 
-            let diagram[string.fret][string_idx] = string.finger
+            " Relativize the chord to the fret_position
+            let fret = string.fret - a:fret_position
+            let diagram[fret][string_idx] = string.finger
         endif
         let string_idx += 1
     endfor

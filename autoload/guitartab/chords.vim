@@ -34,23 +34,58 @@ function! guitartab#chords#is_open_or_muted(string)
     return a:string is v:null || guitartab#chords#is_open(a:string)
 endfunction
 
-function! guitartab#chords#is_bar_chord(chord)
-    " Ensure all strings associated with the bar chord are
-    " fretted with first finger
-    let to_check = []
-    if !guitartab#chords#is_muted(a:chord[0])
-        let to_check = [a:chord[0], a:chord[4], a:chord[5]]
-    else
-        let to_check = [a:chord[1], a:chord[5]]
-    endif
 
-    for string in to_check
-        if guitartab#chords#is_open_or_muted(string) || string.finger != 1
-            return v:false
+" Gets the sections of a guitar chord that are barred with a single
+" finger (usually finger 1).
+"
+" This returns a list of Dicts in the following format:
+"
+" { "finger": <int representing which finger is used (1 based),
+"   "fret"  : <int representing which fret is used (0 based),
+"   "start" : <int representing starting string (0 based)>,
+"   "end"   : <int representing ending string (0 based)> }
+"
+" Barred sections occur when either:
+"
+" (1) the strings are trivially barred - that is consective strings
+" have the same finger and fret (e.g. x02220)
+" (2) one or more strings are surrounded on both (left & right) sides
+" with a string that have the same (e.g. x13321)
+function! guitartab#chords#get_barred_sections(chord)
+    " Maps from finger to min/max string values
+    let idx = 0
+    let finger_ranges = {}
+
+    " Loop through and find barred ranges
+    for string in a:chord
+        if !guitartab#chords#is_open_or_muted(string)
+            " Initialize the range if it doesn't exist and update it
+            if !has_key(finger_ranges, string.finger)
+                let finger_ranges[string.finger] = {
+                    \ "finger": string.finger,
+                    \ "fret": string.fret,
+                    \ "start": idx,
+                    \ "end": idx,
+                    \ }
+            endif
+
+            let curr_range = finger_ranges[string.finger]
+            let curr_range.end = idx
         endif
+
+        let idx += 1
     endfor
-    return v:true
+
+    " Convert it to a list, removing any where the start and end are the same
+    return filter(values(finger_ranges), {_, fr -> fr.start != fr.end})
 endfunction
+
+
+function! guitartab#chords#is_bar_chord(chord)
+    let barred_sections = guitartab#chords#get_barred_sections(a:chord)
+    return len(barred_sections) > 0
+endfunction
+
 
 " Chord helper - 'F' for finger placed at position/fret x
 function! s:F(finger, fret)

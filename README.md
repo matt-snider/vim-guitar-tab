@@ -20,6 +20,5 @@ These are things I plan to implement:
 * Chord definitions: scan for chord diagrams in file in various format
     * e.g. C x32010 
     * e.g. chord diagram (both vertical and horizontal formats)
-* Display barred strings as a line
 * Don't show string state line if there is none
 
