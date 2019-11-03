@@ -4,6 +4,16 @@ A simple, experimental guitar tab viewer in NeoVim.
 
 ![vim-guitar-tab example](screenshots/example.png)
 
+
+## Installation
+
+Add the following to your vim config file:
+
+```vim
+Plug 'matt-snider/vim-guitar-tab'
+au BufRead,BufNewFile *.tab set filetype=guitartab
+```
+
 ## Features
 
 * Syntax highlighting
