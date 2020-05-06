@@ -2,8 +2,34 @@
 "
 " Autoload
 
+let s:timer = v:null
 let s:chord_regex = '\<[A-G][b#]\?\(\(sus\|maj\|min\|aug\|dim\|m\)\d\?\)\?\(/[A-G][b#]\?\)\?\>'
 let s:chord_line_regex = '^\(\s\|\(' . s:chord_regex . '\)\)\+$'
+
+function! Tick(timer)
+    let line = line('.')
+    let eof = line('$')
+    if line == eof
+        echo "Reached EOF, stopping timer"
+        call guitartab#autoscroll_stop()
+    else
+        echo "Tick"
+        call execute('normal! j')
+    endif
+endfunction
+
+
+function! guitartab#autoscroll_start(delay_ms) abort
+    echo "Starting timer"
+    call guitartab#autoscroll_stop()
+    let s:timer = timer_start(a:delay_ms, 'Tick', {'repeat': -1})
+endfunction
+
+function! guitartab#autoscroll_stop() abort
+    if s:timer != v:null
+        call timer_stop(s:timer)
+    endif
+endfunction
 
 " The handler for Enter/<CR> so we can override the behaviour.
 " Checks if there is a chord at cursor and shows it, otherwise
