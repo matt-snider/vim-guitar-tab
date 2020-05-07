@@ -3,6 +3,7 @@
 " Autoload
 
 let s:timer = v:null
+let s:timer_interval = 0
 let s:chord_regex = '\<[A-G][b#]\?\(\(sus\|maj\|min\|aug\|dim\|m\)\d\?\)\?\(/[A-G][b#]\?\)\?\>'
 let s:chord_line_regex = '^\(\s\|\(' . s:chord_regex . '\)\)\+$'
 
@@ -13,22 +14,45 @@ function! Tick(timer)
         echo "Reached EOF, stopping timer"
         call guitartab#autoscroll_stop()
     else
-        echo "Tick"
+        echo "Tick " . s:timer_interval . "ms"
         call execute('normal! j')
     endif
 endfunction
 
-
-function! guitartab#autoscroll_start(delay_ms) abort
+function! guitartab#autoscroll_start(interval) abort
     echo "Starting timer"
     call guitartab#autoscroll_stop()
-    let s:timer = timer_start(a:delay_ms, 'Tick', {'repeat': -1})
+    let s:timer_interval = a:interval
+    let s:timer = timer_start(a:interval, 'Tick', {'repeat': -1})
 endfunction
 
 function! guitartab#autoscroll_stop() abort
     if s:timer != v:null
         call timer_stop(s:timer)
+        let s:timer_interval = 0
+        let s:timer = v:null
     endif
+endfunction
+
+function! guitartab#autoscroll_faster(delta) abort
+    if s:timer == v:null
+        return
+    endif
+
+    let interval = s:timer_interval - a:delta
+    if interval < 200
+        echoerr "Min interval is 200ms (current: " . s:timer_interval . "ms)"
+        return
+    endif
+
+    call guitartab#autoscroll_start(interval)
+endfunction
+
+function! guitartab#autoscroll_slower(delta) abort
+    if s:timer == v:null
+        return
+    endif
+    call guitartab#autoscroll_start(s:timer_interval + a:delta)
 endfunction
 
 " The handler for Enter/<CR> so we can override the behaviour.
