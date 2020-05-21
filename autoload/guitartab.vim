@@ -18,6 +18,10 @@ function! Tick(timer_id)
     endif
 endfunction
 
+function! guitartab#is_running()
+    return s:timer.id != v:null
+endfunction
+
 function! guitartab#autoscroll_start(interval) abort
     echo "Starting timer"
 
@@ -30,14 +34,22 @@ function! guitartab#autoscroll_start(interval) abort
 endfunction
 
 function! guitartab#autoscroll_stop() abort
-    if s:timer.id != v:null
+    if guitartab#is_running()
         call timer_stop(s:timer.id)
         let s:timer = { 'id': v:null, 'interval': 0 }
     endif
 endfunction
 
+function! guitartab#autoscroll_toggle() abort
+    if guitartab#is_running()
+        call guitartab#autoscroll_stop()
+    else
+        call guitartab#autoscroll_start(1000)
+    endif
+endfunction
+
 function! guitartab#autoscroll_faster(delta) abort
-    if s:timer.id == v:null
+    if !guitartab#is_running()
         return
     endif
 
@@ -51,7 +63,7 @@ function! guitartab#autoscroll_faster(delta) abort
 endfunction
 
 function! guitartab#autoscroll_slower(delta) abort
-    if s:timer.id == v:null
+    if !guitartab#is_running()
         return
     endif
     call guitartab#autoscroll_start(s:timer.interval + a:delta)

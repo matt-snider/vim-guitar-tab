@@ -13,12 +13,14 @@ command! -nargs=0 -bar GuitarTabChordHover call guitartab#hover_chord()
 noremap <expr><buffer> <CR> guitartab#kbd_enter()
 
 " Timer commands
-command! -nargs=0 -bar GuitarTabAutoscroll call guitartab#autoscroll_start(500)
+command! -nargs=0 -bar GuitarTabAutoscrollStart call guitartab#autoscroll_start(1000)
 command! -nargs=0 -bar GuitarTabAutoscrollStop call guitartab#autoscroll_stop()
+command! -nargs=0 -bar GuitarTabAutoscrollToggle call guitartab#autoscroll_toggle()
 command! -nargs=0 -bar GuitarTabAutoscrollFaster call guitartab#autoscroll_faster(100)
 command! -nargs=0 -bar GuitarTabAutoscrollSlower call guitartab#autoscroll_slower(100)
 
 " Timer bindings
 nmap + :GuitarTabAutoscrollFaster<CR>
 nmap - :GuitarTabAutoscrollSlower<CR>
+nmap <Space> :GuitarTabAutoscrollToggle<CR>
 
